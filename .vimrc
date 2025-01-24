@@ -37,9 +37,14 @@ Plug 'vim-airline/vim-airline-themes'
 Plug 'joshdick/onedark.vim'
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
-Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'tpope/vim-fugitive'
 Plug 'airblade/vim-gitgutter'
+Plug 'prabirshrestha/vim-lsp'
+Plug 'prabirshrestha/asyncomplete.vim'
+Plug 'prabirshrestha/asyncomplete-lsp.vim'
+Plug 'prabirshrestha/vim-lsp'
+Plug 'prabirshrestha/asyncomplete.vim'
+Plug 'prabirshrestha/asyncomplete-lsp.vim'
 call plug#end()
 
 " NERDTree設定 (VSCode風のサイドバー)
@@ -64,23 +69,14 @@ nnoremap <C-k> :bnext<CR>           " 次のタブ
 " fzf設定
 let g:fzf_layout = { 'window': { 'width': 0.9, 'height': 0.9 } }
 
-" CoC設定
-let g:coc_global_extensions = [
- \ 'coc-json',
- \ 'coc-tsserver',
- \ 'coc-pyright',
- \ 'coc-prettier'
- \ ]
-
-" CoC キーバインド（VSCode互換）
-nmap <silent> gd <Plug>(coc-definition)
-nmap <silent> gy <Plug>(coc-type-definition)
-nmap <silent> gi <Plug>(coc-implementation)
-nmap <silent> gr <Plug>(coc-references)
-nmap <leader>rn <Plug>(coc-rename)
-nmap <leader>f <Plug>(coc-format)
-nmap <leader>a <Plug>(coc-codeaction)
-nmap <leader>qf <Plug>(coc-fix-current)
+" LSP設定
+if executable('pyls')
+    au User lsp_setup call lsp#register_server({
+        \ 'name': 'pyls',
+        \ 'cmd': {server_info->['pyls']},
+        \ 'allowlist': ['python'],
+        \ })
+endif
 
 " カラースキーム設定
 syntax on
