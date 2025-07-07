@@ -1,5 +1,5 @@
 ``` bash
-clone git@github.com:aramoto99/vimrc.git
+git clone git@github.com:aramoto99/vimrc.git
 cd vimrc
 ```
 ``` bash
