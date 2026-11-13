@@ -135,6 +135,24 @@ nnoremap <silent> <leader>y :.call YankOSC52(getline('.'))<CR>
 vnoremap <silent> <leader>y :<C-u>call YankOSC52Visual()<CR>
 nnoremap <silent> <leader>Y :<C-u>call YankOSC52(join(getline(1, '$'), "\n"))<CR>
 
+" 普通の y (ヤンク) でも自動で OSC52 経由で手元のクリップボードへ送る
+" マウス選択 → y → ブラウザで Ctrl+V だけで、行番号やインデントガイド(┊)が混ざらない
+" "+y / "*y は同梱 osc52 が処理するので二重送信を避ける
+function! s:AutoYankOSC52() abort
+    if v:event.operator !=# 'y' || v:event.regname =~# '[+*]'
+        return
+    endif
+    let l:text = join(v:event.regcontents, "\n")
+    if v:event.regtype ==# 'V'
+        let l:text .= "\n"
+    endif
+    call YankOSC52(l:text)
+endfunction
+augroup AutoYankOSC52
+    autocmd!
+    autocmd TextYankPost * call s:AutoYankOSC52()
+augroup END
+
 " Vim 同梱パッケージ
 packadd comment      " gcc / gc でコメント切替 (vim-commentary の代替)
 packadd hlyank       " ヤンク範囲を一瞬ハイライト
@@ -155,6 +173,19 @@ Plug 'prabirshrestha/asyncomplete.vim'
 Plug 'prabirshrestha/asyncomplete-lsp.vim'
 Plug 'tpope/vim-surround'
 call plug#end()
+
+" Python: ruff (LSP) で未使用インポート(F401)を検知 (検知のみ・自動修正なし)
+if executable('ruff')
+    augroup LspRuff
+        autocmd!
+        autocmd User lsp_setup call lsp#register_server({
+                    \ 'name': 'ruff',
+                    \ 'cmd': {server_info -> ['ruff', 'server']},
+                    \ 'allowlist': ['python'],
+                    \ 'initialization_options': {'settings': {'lint': {'select': ['F401']}}},
+                    \ })
+    augroup END
+endif
 
 " NERDTree設定 (VSCode風のサイドバー)
 nnoremap <C-b> :NERDTreeToggle<CR>
@@ -278,6 +309,7 @@ function! ShowVimHelp()
    echo "  Ctrl-W N    : ターミナル出力をスクロール (i で戻る)"
    echo "  外部で変更されたファイルは自動で再読込されます (u で戻せる)"
    echo "\nクリップボード (OSC52 / SSH経由):"
+   echo "  y        : ヤンクと同時に手元のクリップボードへ自動コピー"
    echo "  \"+y      : 同梱 osc52 でコピー"
    echo "  leader+y : 現在行/選択範囲をコピー (自作版)"
    echo "  leader+Y : ファイル全体をコピー (自作版)"
